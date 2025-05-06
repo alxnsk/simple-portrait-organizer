@@ -1,5 +1,5 @@
 {
-    "simple-image-converter" : {
+    "simple-portrait-organizer" : {
         "settings" : {
             "uploadDirectoryName" : "Папка для выгрузки",
             "uploadDirectoryHint" : "В эту директорию будут сохраняться изображения загруженные пользователями.",

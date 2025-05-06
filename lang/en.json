@@ -1,5 +1,5 @@
 {
-    "simple-image-converter" : {
+    "simple-portrait-organizer" : {
         "settings" : {
             "uploadDirectoryName" : "Upload directory",
             "uploadDirectoryHint" : "Choose the directory where converted WebP images will be saved.",

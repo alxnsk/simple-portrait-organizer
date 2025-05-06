@@ -1,7 +1,7 @@
 Hooks.once('init', () => {
     const originalBrowse = FilePicker.prototype.browse;
     FilePicker.prototype.browse = async function () {
-        const forced = game.settings.get("simple-image-converter", "enabledForGm") || false;
+        const forced = game.settings.get("simple-portrait-organizer", "enabledForGm") || false;
 
         const hijackModes = {
             "imagevideo" : true,
@@ -27,9 +27,9 @@ Hooks.once('init', () => {
     }
     
     // Directory picker setting
-    game.settings.register("simple-image-converter", "uploadDirectory", {
-        name: game.i18n.localize("simple-image-converter.settings.uploadDirectoryName"),
-        hint: game.i18n.localize("simple-image-converter.settings.uploadDirectoryHint"),
+    game.settings.register("simple-portrait-organizer", "uploadDirectory", {
+        name: game.i18n.localize("simple-portrait-organizer.settings.uploadDirectoryName"),
+        hint: game.i18n.localize("simple-portrait-organizer.settings.uploadDirectoryHint"),
         scope: "world",
         config: true,
         default: "",
@@ -38,9 +38,9 @@ Hooks.once('init', () => {
     });
     
     // Max side size in pixels.
-    game.settings.register("simple-image-converter", "maxSidePixelSize", {
-        name: game.i18n.localize("simple-image-converter.settings.maxSidePixelSizeName"),
-        hint: game.i18n.localize("simple-image-converter.settings.maxSidePixelSizeHint"),
+    game.settings.register("simple-portrait-organizer", "maxSidePixelSize", {
+        name: game.i18n.localize("simple-portrait-organizer.settings.maxSidePixelSizeName"),
+        hint: game.i18n.localize("simple-portrait-organizer.settings.maxSidePixelSizeHint"),
         scope: "world",
         config: true,
         default: 0,
@@ -48,27 +48,27 @@ Hooks.once('init', () => {
     });
     
     // Compression rate percent
-    game.settings.register("simple-image-converter", "qualityPercent", {
-        name: game.i18n.localize("simple-image-converter.settings.qualityPercentName"),
-        hint: game.i18n.localize("simple-image-converter.settings.qualityPercentHint"),
+    game.settings.register("simple-portrait-organizer", "qualityPercent", {
+        name: game.i18n.localize("simple-portrait-organizer.settings.qualityPercentName"),
+        hint: game.i18n.localize("simple-portrait-organizer.settings.qualityPercentHint"),
         scope: "world",
         config: true,
         type: new foundry.data.fields.NumberField({nullable: false, min: 10, max: 95, step: 5}),
         default: 80
     });
     
-    game.settings.register("simple-image-converter", "enabledForGm", {
-        name: game.i18n.localize("simple-image-converter.settings.enabledForGmName"),
-        hint: game.i18n.localize("simple-image-converter.settings.enabledForGmHint"),
+    game.settings.register("simple-portrait-organizer", "enabledForGm", {
+        name: game.i18n.localize("simple-portrait-organizer.settings.enabledForGmName"),
+        hint: game.i18n.localize("simple-portrait-organizer.settings.enabledForGmHint"),
         scope: "world",
         config: true,
         default: false,
         type: Boolean
     });
 
-    game.settings.register("simple-image-converter", "generateRandomFileName", {
-        name: game.i18n.localize("simple-image-converter.settings.generateRandomFileNameName"),
-        hint: game.i18n.localize("simple-image-converter.settings.generateRandomFileNameHint"),
+    game.settings.register("simple-portrait-organizer", "generateRandomFileName", {
+        name: game.i18n.localize("simple-portrait-organizer.settings.generateRandomFileNameName"),
+        hint: game.i18n.localize("simple-portrait-organizer.settings.generateRandomFileNameHint"),
         scope: "world",
         config: true,
         default: false,
@@ -90,9 +90,9 @@ class WebPConverterApp extends FormApplication {
     
     static get defaultOptions() {
         return foundry.utils.mergeObject(super.defaultOptions, {
-            id: "simple-image-converter",
+            id: "simple-portrait-organizer",
             title: "Simple image converter",
-            template: "modules/simple-image-converter/templates/ui.html"
+            template: "modules/simple-portrait-organizer/templates/ui.html"
         });
     }
     
@@ -137,8 +137,8 @@ class WebPConverterApp extends FormApplication {
             img.src = e.target.result;
             document.getElementById("preview-canvas").src = img.src;
             img.onload = async () => {
-                const settingSizeLimit = game.settings.get("simple-image-converter", "maxSidePixelSize") || 0;
-                const settingCompression = game.settings.get("simple-image-converter", "qualityPercent") || 80;
+                const settingSizeLimit = game.settings.get("simple-portrait-organizer", "maxSidePixelSize") || 0;
+                const settingCompression = game.settings.get("simple-portrait-organizer", "qualityPercent") || 80;
                 
                 let targetQuality = settingCompression / 100;
                 if(settingCompression < 10 || settingCompression > 100){
@@ -168,11 +168,11 @@ class WebPConverterApp extends FormApplication {
                 canvas.toBlob(async (blob) => {
                     const safeUserName = WebPConverterApp.escapeUserName(game.user.name);
                     //Name is random or no?
-                    const newFileName = true === game.settings.get("simple-image-converter", "generateRandomFileName") ? 
+                    const newFileName = true === game.settings.get("simple-portrait-organizer", "generateRandomFileName") ? 
                         safeUserName + "-" + foundry.utils.randomID(18) + ".webp" : safeUserName + "-" + file.name.replace(/\.\w+$/, ".webp");
                     
                     const webpFile = new File([blob], newFileName, { type: "image/webp" });
-                    let uploadPath = game.settings.get("simple-image-converter", "uploadDirectory") || "";
+                    let uploadPath = game.settings.get("simple-portrait-organizer", "uploadDirectory") || "";
 
                     
                     const result = await FilePicker.upload("data", uploadPath, webpFile);
