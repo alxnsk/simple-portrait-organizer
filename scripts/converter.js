@@ -97,12 +97,20 @@ class WebPConverterApp extends FormApplication {
     }
     
     activateListeners(html) {
-        html.find("#upload").on("change", this._handleUpload.bind(this));
-        
         const dropArea      = html.find("#drop-area")[0];
         const previewCanvas = html.find("#preview-canvas")[0];
         const inputUpload   = html.find("#upload")[0];
+        function showPreview(){
+            dropArea.classList.add("hidden");
+            inputUpload.classList.add("hidden");
+            previewCanvas.classList.remove("hidden");
+        }
 
+        html.find("#upload").on("change", (e)=>{
+            showPreview();
+            this._handleUpload.call(this, e);
+        });
+        
         dropArea.addEventListener("dragover", (e) => {
             e.preventDefault();
             dropArea.classList.add("hover");
@@ -114,11 +122,7 @@ class WebPConverterApp extends FormApplication {
         
         dropArea.addEventListener("drop", (e) => {
             e.preventDefault();
-            //dropArea.classList.remove("hover");
-            dropArea.classList.add("hidden");
-            inputUpload.classList.add("hidden");
-            previewCanvas.classList.remove("hidden");
-            
+            showPreview();
             const file = e.dataTransfer.files[0];
             if (file) this._convertAndUpload(file);
         });
@@ -166,8 +170,8 @@ class WebPConverterApp extends FormApplication {
                 canvas.getContext("2d").drawImage(img, 0, 0, img.width, img.height, 0,0, targetWidth, targetHeight);
                 
                 canvas.toBlob(async (blob) => {
-                    const safeUserName = WebPConverterApp.escapeUserName(game.user.name);
-                    //Name is random or no?
+                    const safeUserName = WebPConverterApp.escapeFileName(game.user.name);
+                    //Name is random or not?
                     const newFileName = true === game.settings.get("simple-portrait-organizer", "generateRandomFileName") ? 
                         safeUserName + "-" + foundry.utils.randomID(18) + ".webp" : safeUserName + "-" + file.name.replace(/\.\w+$/, ".webp");
                     
@@ -176,7 +180,6 @@ class WebPConverterApp extends FormApplication {
 
                     
                     const result = await FilePicker.upload("data", uploadPath, webpFile);
-                    debugger;
                     if (this._resolver) this._resolver(result.path); // Resolve the promise with the file path
                     this.close();
                     
@@ -187,7 +190,7 @@ class WebPConverterApp extends FormApplication {
         reader.readAsDataURL(file);
     }
 
-    static escapeUserName(dirtyString){
+    static escapeFileName(dirtyString){
         return dirtyString.replace(/[^A-Za-z\d]/g, "x");
     }
 }
