@@ -100,6 +100,7 @@ class WebPConverterApp extends FormApplication {
         const dropArea      = html.find("#drop-area")[0];
         const previewCanvas = html.find("#preview-canvas")[0];
         const inputUpload   = html.find("#upload")[0];
+        
         function showPreview(){
             dropArea.classList.add("hidden");
             inputUpload.classList.add("hidden");
@@ -108,7 +109,8 @@ class WebPConverterApp extends FormApplication {
 
         html.find("#upload").on("change", (e)=>{
             showPreview();
-            this._handleUpload.call(this, e);
+            if (e.target.files[0])
+                this._convertAndUpload(e.target.files[0]);
         });
         
         dropArea.addEventListener("dragover", (e) => {
@@ -126,11 +128,6 @@ class WebPConverterApp extends FormApplication {
             const file = e.dataTransfer.files[0];
             if (file) this._convertAndUpload(file);
         });
-    }
-    
-    async _handleUpload(event) {
-        const file = event.target.files[0];
-        if (file) this._convertAndUpload(file);
     }
     
     async _convertAndUpload(file) {
