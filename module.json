@@ -5,7 +5,8 @@
     "version": "1.0.1",
     "authors": [
         {
-            "name": "alxnsk"
+            "id": "alxnsk",
+            "url": "https://github.com/alxnsk"
         }
     ],
     "scripts": ["scripts/converter.js"],
@@ -30,5 +31,25 @@
     ],
     "manifest": "https://github.com/alxnsk/simple-portrait-organizer/releases/latest/download/module.json",
     "download": "https://github.com/alxnsk/simple-portrait-organizer/releases/latest/download/module.zip",
-    "readme": "https://github.com/alxnsk/simple-portrait-organizer#readme"
+    "readme": "https://github.com/alxnsk/simple-portrait-organizer#readme",
+
+    "media": [
+		{
+			"type": "cover",
+			"url": "https://raw.githubusercontent.com/alxnsk/simple-portrait-organizer/refs/heads/main/artwork/module/cover.webp",
+			"loop": false,
+			"flags": {}
+		},
+		{
+			"type": "icon",
+			"url": "https://raw.githubusercontent.com/alxnsk/simple-portrait-organizer/refs/heads/main/artwork/module/icon.webp",
+			"loop": false,
+			"flags": {}
+		},
+		{
+			"type": "setup",
+			"url": "modules/simple-portrait-organizer/artwork/module/cover.webp",
+			"thumbnail": "modules/simple-portrait-organizer/artwork/module/setup.webp"
+		}
+	]
 }
