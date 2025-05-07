@@ -5,7 +5,7 @@
     "version": "1.0.1",
     "authors": [
         {
-            "id": "alxnsk",
+            "name": "alxnsk",
             "url": "https://github.com/alxnsk"
         }
     ],
@@ -13,9 +13,9 @@
     "styles": ["styles/style.css"],
     "esmodules": [],
     "compatibility": {
-        "minimum": 11,
+        "minimum": 12,
         "maximum": 13,
-        "verified": 12.331
+        "verified": 12
     },
     "languages": [
         {
