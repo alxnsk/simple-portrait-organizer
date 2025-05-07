@@ -108,9 +108,10 @@ class WebPConverterApp extends FormApplication {
         }
 
         html.find("#upload").on("change", (e)=>{
-            showPreview();
-            if (e.target.files[0])
+            if (e.target.files[0]){
+                showPreview();
                 this._convertAndUpload(e.target.files[0]);
+            }
         });
         
         dropArea.addEventListener("dragover", (e) => {
