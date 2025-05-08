@@ -53,7 +53,8 @@ Hooks.once('init', () => {
         hint: game.i18n.localize("simple-portrait-organizer.settings.qualityPercentHint"),
         scope: "world",
         config: true,
-        type: new foundry.data.fields.NumberField({nullable: false, min: 10, max: 95, step: 5}),
+        type: Number,
+        range: { min: 0, max: 10, step: 2 },
         default: 80
     });
     

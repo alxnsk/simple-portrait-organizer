@@ -13,7 +13,7 @@
     "styles": ["styles/style.css"],
     "esmodules": [],
     "compatibility": {
-        "minimum": 12,
+        "minimum": 10,
         "maximum": 13,
         "verified": 12
     },
