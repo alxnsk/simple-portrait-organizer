@@ -12,3 +12,13 @@ This FoundryVTT module replaces the standard FilePicker window for non-GM users 
 All that, and it still looks less complicated than airplane controls, even for users who aren’t that tech-savvy.
 
 Simple.
+
+## Installation
+Add-on **Modules** -> **Install Module** -> Paste this:
+
+*https://github.com/alxnsk/simple-portrait-organizer/releases/latest/download/module.json*
+
+to **Manifest URL** field in the bottom of "Install Module" window
+
+## User experience
+![User experience illustration](/artwork/repo/user-experience.webp)
