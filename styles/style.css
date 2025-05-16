@@ -1,4 +1,4 @@
-#drop-area {
+#simple-portrait-organizer-drop-area {
     border: 2px dashed #ccc;
     padding: 20px;
     text-align: center;
@@ -6,11 +6,11 @@
     min-height: 300px;
 }
 
-#drop-area.hover {
+#simple-portrait-organizer-drop-area.hover {
     background-color: #eee;
 }
 
-#preview-canvas {
+#simple-portrait-organizer-preview-canvas {
     margin-top: 10px;
     max-width: 100%;
     height: 100%;
@@ -18,11 +18,11 @@
     min-height: 300px;
 }
 
-#webp-image-converter-form{
+#simple-portrait-organizer-form{
     min-width: 400px;
     min-height: 350px;
 }
 
-.hidden {
+.simple-portrait-organizer-hidden {
     display: none;
 }
