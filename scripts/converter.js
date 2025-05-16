@@ -12,7 +12,7 @@ Hooks.once('init', () => {
             return originalBrowse.call(this, ...arguments);
         }
 
-        const app = new WebPConverterApp();
+        const app = new SimplePortraitOrganizer();
         app.render(true);
         const path = await app.result;
         // Update the target field
@@ -26,7 +26,7 @@ Hooks.once('init', () => {
         
     }
     
-    // Directory picker setting
+    // Upload dir path
     game.settings.register("simple-portrait-organizer", "uploadDirectory", {
         name: game.i18n.localize("simple-portrait-organizer.settings.uploadDirectoryName"),
         hint: game.i18n.localize("simple-portrait-organizer.settings.uploadDirectoryHint"),
@@ -36,7 +36,17 @@ Hooks.once('init', () => {
         type: String,
         filePicker: "folder"
     });
-    
+
+    game.settings.register("simple-portrait-organizer", "capturePasteEvents", {
+        name: game.i18n.localize("simple-portrait-organizer.settings.capturePasteEventsName"),
+        hint: game.i18n.localize("simple-portrait-organizer.settings.capturePasteEventsHint"),
+        scope: "world",
+        config: true,
+        default: true,
+        requiresReload: true,
+        type: Boolean
+    });
+
     // Max side size in pixels.
     game.settings.register("simple-portrait-organizer", "maxSidePixelSize", {
         name: game.i18n.localize("simple-portrait-organizer.settings.maxSidePixelSizeName"),
@@ -57,15 +67,6 @@ Hooks.once('init', () => {
         range: { min: 5, max: 95, step: 5 },
         default: 80
     });
-    
-    game.settings.register("simple-portrait-organizer", "enabledForGm", {
-        name: game.i18n.localize("simple-portrait-organizer.settings.enabledForGmName"),
-        hint: game.i18n.localize("simple-portrait-organizer.settings.enabledForGmHint"),
-        scope: "world",
-        config: true,
-        default: false,
-        type: Boolean
-    });
 
     game.settings.register("simple-portrait-organizer", "generateRandomFileName", {
         name: game.i18n.localize("simple-portrait-organizer.settings.generateRandomFileNameName"),
@@ -76,13 +77,49 @@ Hooks.once('init', () => {
         type: Boolean
     });
     
+    game.settings.register("simple-portrait-organizer", "enabledForGm", {
+        name: game.i18n.localize("simple-portrait-organizer.settings.enabledForGmName"),
+        hint: game.i18n.localize("simple-portrait-organizer.settings.enabledForGmHint"),
+        scope: "world",
+        config: true,
+        default: false,
+        type: Boolean
+    });
+
+    // Special upload dir for GM. If needed.
+    game.settings.register("simple-portrait-organizer", "uploadDirectoryGM", {
+        name: game.i18n.localize("simple-portrait-organizer.settings.uploadDirectoryGMName"),
+        hint: game.i18n.localize("simple-portrait-organizer.settings.uploadDirectoryGMHint"),
+        scope: "world",
+        config: true,
+        default: "",
+        type: String,
+        filePicker: "folder"
+    });
+
+    game.settings.register("simple-portrait-organizer", "keepOriginalFilenamesForGM", {
+        name: game.i18n.localize("simple-portrait-organizer.settings.keepOriginalFilenamesForGMName"),
+        hint: game.i18n.localize("simple-portrait-organizer.settings.keepOriginalFilenamesForGMHint"),
+        scope: "world",
+        config: true,
+        default: false,
+        type: Boolean
+    });
+    
 });
 
-class WebPConverterApp extends FormApplication {
+class SimplePortraitOrganizer extends FormApplication {
     constructor(...args) {
         super(...args);
         this._resolver = null;
         this._promise = new Promise(resolve => this._resolver = resolve);
+        this.pasteEventHandler = this.#processPastedImage.bind(this);
+        
+        if( true === game.settings.get("simple-portrait-organizer", "capturePasteEvents") ){
+            Hooks.on('closeSimplePortraitOrganizer', function(){
+                window.removeEventListener("paste", this.pasteEventHandler);
+            }.bind(this));
+        }
     }
     
     get result() {
@@ -92,41 +129,55 @@ class WebPConverterApp extends FormApplication {
     static get defaultOptions() {
         return foundry.utils.mergeObject(super.defaultOptions, {
             id: "simple-portrait-organizer",
-            title: "Simple image converter",
+            title: "Simple Portrait Organizer",
             template: "modules/simple-portrait-organizer/templates/ui.html"
         });
     }
+
+    #processPastedImage(event){
+        const pastedData = event?.clipboardData?.files[0];
+        if ( undefined != pastedData && pastedData.type.substring(0,6) === "image/"){
+            this.#showPreview();
+            this._convertAndUpload(event.clipboardData.files[0]);
+        }
+    }
+
+    #showPreview(){
+        this.dropArea.classList.add("simple-portrait-organizer-hidden");
+        this.inputUpload.classList.add("simple-portrait-organizer-hidden");
+        this.previewCanvas.classList.remove("simple-portrait-organizer-hidden");
+    }
     
     activateListeners(html) {
-        const dropArea      = html.find("#drop-area")[0];
-        const previewCanvas = html.find("#preview-canvas")[0];
-        const inputUpload   = html.find("#upload")[0];
-        
-        function showPreview(){
-            dropArea.classList.add("hidden");
-            inputUpload.classList.add("hidden");
-            previewCanvas.classList.remove("hidden");
-        }
+        this.html = html;
 
-        html.find("#upload").on("change", (e)=>{
+        this.dropArea      = html.find("#simple-portrait-organizer-drop-area")[0];
+        this.inputUpload   = html.find("#simple-portrait-organizer-upload")[0];
+        this.previewCanvas = html.find("#simple-portrait-organizer-preview-canvas")[0];
+
+        if( true === game.settings.get("simple-portrait-organizer", "capturePasteEvents") ){
+            window.addEventListener("paste", this.pasteEventHandler);
+        };
+
+        this.inputUpload.addEventListener("change", (e)=>{
             if (e.target.files[0]){
-                showPreview();
+                this.#showPreview();
                 this._convertAndUpload(e.target.files[0]);
             }
         });
         
-        dropArea.addEventListener("dragover", (e) => {
+        this.dropArea.addEventListener("dragover", (e) => {
             e.preventDefault();
-            dropArea.classList.add("hover");
+            this.dropArea.classList.add("hover");
         });
         
-        dropArea.addEventListener("dragleave", () => {
-            dropArea.classList.remove("hover");
+        this.dropArea.addEventListener("dragleave", () => {
+            this.dropArea.classList.remove("hover");
         });
         
-        dropArea.addEventListener("drop", (e) => {
+        this.dropArea.addEventListener("drop", (e) => {
             e.preventDefault();
-            showPreview();
+            this.#showPreview();
             const file = e.dataTransfer.files[0];
             if (file) this._convertAndUpload(file);
         });
@@ -138,7 +189,7 @@ class WebPConverterApp extends FormApplication {
         
         reader.onload = (e) => {
             img.src = e.target.result;
-            document.getElementById("preview-canvas").src = img.src;
+            this.html.find("#simple-portrait-organizer-preview-canvas")[0].src = img.src;
             img.onload = async () => {
                 const settingSizeLimit = game.settings.get("simple-portrait-organizer", "maxSidePixelSize") || 0;
                 const settingCompression = game.settings.get("simple-portrait-organizer", "qualityPercent") || 80;
@@ -169,14 +220,30 @@ class WebPConverterApp extends FormApplication {
                 canvas.getContext("2d").drawImage(img, 0, 0, img.width, img.height, 0,0, targetWidth, targetHeight);
                 
                 canvas.toBlob(async (blob) => {
-                    const safeUserName = WebPConverterApp.escapeFileName(game.user.name);
-                    //Name is random or not?
-                    const newFileName = true === game.settings.get("simple-portrait-organizer", "generateRandomFileName") ? 
-                        safeUserName + "-" + foundry.utils.randomID(18) + ".webp" : safeUserName + "-" + file.name.replace(/\.\w+$/, ".webp");
+                    const safeUserName = SimplePortraitOrganizer.escapeFileName(game.user.name);
                     
-                    const webpFile = new File([blob], newFileName, { type: "image/webp" });
-                    let uploadPath = game.settings.get("simple-portrait-organizer", "uploadDirectory") || "";
+                    //Name is random or not? 
+                    let newFileName = "";
 
+                    if( game.user.isGM && game.settings.get("simple-portrait-organizer", "keepOriginalFilenamesForGM") ){
+                        //GM may want to keep original filenames.
+                        newFileName = file.name.replace(/\.\w+$/, ".webp");
+                    }else if( (true === game.settings.get("simple-portrait-organizer", "generateRandomFileName")) || /^image\.[a-zA-Z\d]{3,4}$/.test(file.name) ){
+                        //It's random if GM desided it to be so, or image is pasted with generic name, like image.png, image.webp ... etc.
+                        newFileName = safeUserName + "-" + foundry.utils.randomID(18) + ".webp";
+                    }else{
+                        //In other cases we just take original filename.
+                        newFileName = safeUserName + "-" + file.name.replace(/\.\w+$/, ".webp");
+                    }
+
+                    const webpFile = new File([blob], newFileName, { type: "image/webp" });
+                    let uploadPath = "";
+
+                    if( game.user.isGM && "" !== game.settings.get("simple-portrait-organizer", "uploadDirectoryGM") )
+                        uploadPath = game.settings.get("simple-portrait-organizer", "uploadDirectoryGM");
+                    else
+                        uploadPath = game.settings.get("simple-portrait-organizer", "uploadDirectory") || "";
+                    
                     
                     const result = await FilePicker.upload("data", uploadPath, webpFile);
                     if (this._resolver) this._resolver(result.path); // Resolve the promise with the file path

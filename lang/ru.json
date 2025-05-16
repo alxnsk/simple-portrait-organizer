@@ -4,6 +4,12 @@
             "uploadDirectoryName" : "Папка для выгрузки",
             "uploadDirectoryHint" : "В эту директорию будут сохраняться изображения загруженные пользователями.",
 
+            "uploadDirectoryGMName" : "(Опционально) Папка для выгрузки файлов ГМа",
+            "uploadDirectoryGMHint" : "Если заполнено, то файлы ГМа будут загружаться сюда.",
+
+            "capturePasteEventsName" : "Захватывать файлы из буфера обмена (Ctrl + V)",
+            "capturePasteEventsHint" : "(Требует перезапуска) Потенциально может вызывать конфликты с другими модулями.",
+
             "qualityPercentName" : "Качество webp",
             "qualityPercentHint" : "Качество в процентах 90, 80, 70 и т.д.",
 
@@ -12,6 +18,9 @@
 
             "enabledForGmName" : "Включить модуль для ГМа",
             "enabledForGmHint" : "Позволяет ГМу автоматизировать конвертацию файлов. Не требует перезапуска.",
+
+            "keepOriginalFilenamesForGMName" : "Не менять название файлов ГМа",
+            "keepOriginalFilenamesForGMHint" : "Всё ещё сменит расширение на .webp",
 
             "generateRandomFileNameName" : "Создавать случайное имя для файлов",
             "generateRandomFileNameHint" : "Создаст беспорядок, но новые файлы всегда будут отображаться сразу. Решает проблему редактирования."
