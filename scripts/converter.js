@@ -170,16 +170,17 @@ class SimplePortraitOrganizer extends FormApplication {
 
     #showPreview(){
         this.dropArea.classList.add("simple-portrait-organizer-hidden");
-        this.inputUpload.classList.add("simple-portrait-organizer-hidden");
+        this.inputUploadLabel.classList.add("simple-portrait-organizer-hidden");
         this.previewCanvas.classList.remove("simple-portrait-organizer-hidden");
     }
     
     activateListeners(html) {
         this.html = html;
 
-        this.dropArea      = html.find("#simple-portrait-organizer-drop-area")[0];
-        this.inputUpload   = html.find("#simple-portrait-organizer-upload")[0];
-        this.previewCanvas = html.find("#simple-portrait-organizer-preview-canvas")[0];
+        this.dropArea         = html.find("#simple-portrait-organizer-drop-area")[0];
+        this.inputUpload      = html.find("#simple-portrait-organizer-upload")[0];
+        this.inputUploadLabel = html.find("#simple-portrait-organizer-input-label")[0];
+        this.previewCanvas    = html.find("#simple-portrait-organizer-preview-canvas")[0];
 
         if( true === game.settings.get("simple-portrait-organizer", "capturePasteEvents") ){
             window.addEventListener("paste", this.pasteEventHandler);

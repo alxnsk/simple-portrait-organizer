@@ -1,6 +1,10 @@
 <form id="simple-portrait-organizer-form">
     <label>{{localize "simple-portrait-organizer.form.chooseFile"}}</label>
     <div id="simple-portrait-organizer-drop-area">{{localize "simple-portrait-organizer.form.dropHere"}}</div>
-    <input id="simple-portrait-organizer-upload" type="file" accept="image/*" />
+        <label for="simple-portrait-organizer-upload" id="simple-portrait-organizer-input-label">
+            <i class="fa-solid fa-upload"></i>
+            {{localize "simple-portrait-organizer.form.chooseFileLabel"}}
+        </label>
+        <input id="simple-portrait-organizer-upload" type="file" accept="image/*" class="simple-portrait-organizer-hidden"></input>
     <img id="simple-portrait-organizer-preview-canvas" src="" alt="Preview will appear here" class="simple-portrait-organizer-hidden" />
 </form>
