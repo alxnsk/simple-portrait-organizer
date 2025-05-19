@@ -26,8 +26,8 @@
             "generateRandomFileNameHint" : "Will cause a mess, but ensures the updated image appears immediately. Solves editing problem."
         },
         "form" : {
-            "chooseFile" : "Choose or Drop an Image:",
-            "dropHere" : "Drop image here"
+            "chooseFile" : "Choose, paste or drop an image:",
+            "dropHere" : "Drop an image here, or paste one from the clipboard. (Ctrl + V)"
         }
     }
 }
