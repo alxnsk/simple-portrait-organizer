@@ -137,8 +137,34 @@ class SimplePortraitOrganizer extends FormApplication {
     #processPastedImage(event){
         const pastedData = event?.clipboardData?.files[0];
         if ( undefined != pastedData && pastedData.type.substring(0,6) === "image/"){
-            this.#showPreview();
-            this._convertAndUpload(event.clipboardData.files[0]);
+            if( game.user.isGM && game.settings.get("simple-portrait-organizer", "keepOriginalFilenamesForGM") ){
+                
+                /**If the user is a GM and he wishes to keep the original file names, there's a good chance that when image is pasted from 
+                 * the clipboard, especially if it was copied from a browser, it will have a generic name like "image".
+                 * This can cause undesired behavior, so we will give the user a chance to review the file name and change it if needed. 
+                 * If original names not required, we just replace "image" with random name.*/
+
+                window.removeEventListener("paste", this.pasteEventHandler);
+
+                new Dialog({
+                    title: "Select a filename",
+                    content: '<p/><div align="center"><input id="dialog_box" style="width:375px" autofocus value="' + pastedData.name.replace(/\.\w+$/, "") + '"></input></div>',
+                    buttons: {
+                        ok: {
+                            label: "OK",
+                            callback: function(){
+                                this.#showPreview();
+                                this._convertAndUpload(pastedData, document.getElementById("dialog_box").value + ".webp");
+                            }.bind(this)
+                        }
+                    },
+                    close: function(){this.close()}.bind(this),
+                    default:"ok"
+                }).render(true);
+            }else{
+                this.#showPreview();
+                this._convertAndUpload(pastedData);
+            }            
         }
     }
 
@@ -183,7 +209,7 @@ class SimplePortraitOrganizer extends FormApplication {
         });
     }
     
-    async _convertAndUpload(file) {
+    async _convertAndUpload(file, customName = null) {
         const img = new Image();
         const reader = new FileReader();
         
@@ -224,16 +250,15 @@ class SimplePortraitOrganizer extends FormApplication {
                     
                     //Name is random or not? 
                     let newFileName = "";
-
                     if( game.user.isGM && game.settings.get("simple-portrait-organizer", "keepOriginalFilenamesForGM") ){
                         //GM may want to keep original filenames.
-                        newFileName = file.name.replace(/\.\w+$/, ".webp");
+                        newFileName = customName ?? file.name.replace(/\.\w+$/, ".webp");
                     }else if( (true === game.settings.get("simple-portrait-organizer", "generateRandomFileName")) || /^image\.[a-zA-Z\d]{3,4}$/.test(file.name) ){
                         //It's random if GM desided it to be so, or image is pasted with generic name, like image.png, image.webp ... etc.
                         newFileName = safeUserName + "-" + foundry.utils.randomID(18) + ".webp";
                     }else{
                         //In other cases we just take original filename.
-                        newFileName = safeUserName + "-" + file.name.replace(/\.\w+$/, ".webp");
+                        newFileName = safeUserName + "-" + ( customName ?? file.name.replace(/\.\w+$/, ".webp") );
                     }
 
                     const webpFile = new File([blob], newFileName, { type: "image/webp" });
