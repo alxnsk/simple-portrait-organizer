@@ -27,7 +27,8 @@
         },
         "form" : {
             "chooseFile" : "Choose, paste or drop an image:",
-            "dropHere" : "Drop an image here, or paste one from the clipboard. (Ctrl + V)"
+            "dropHere" : "Drop an image here, or paste one from the clipboard. (Ctrl + V)",
+            "chooseFileLabel" : "Choose file"
         }
     }
 }
