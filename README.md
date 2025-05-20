@@ -7,6 +7,7 @@
 
 ![Supported platforms](https://img.shields.io/badge/Supported_Foundry_Versions-10--13-%23556b2f)
 ![Version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fgithub.com%2Falxnsk%2Fsimple-portrait-organizer%2Freleases%2Flatest%2Fdownload%2Fmodule.json&query=%24.version&style=flat&label=Current%20version&color=%23556b2f)
+![License](https://img.shields.io/github/license/alxnsk/simple-portrait-organizer)
 
 No more "UltraHiRez 72Mb in size" **.png** files! 
 No more, *or at least less*: pleas, tears, treats or social contracts during the pre-planning stage of your TRPG campaign!
@@ -22,7 +23,8 @@ Add-on **Modules** -> **Install Module** -> Paste this:
 
 *https://github.com/alxnsk/simple-portrait-organizer/releases/latest/download/module.json*
 
-to **Manifest URL** field in the bottom of "Install Module" window
+to **Manifest URL** field in the bottom of "Install Module" window and press **"Install"**.
+Congrats, you did it!
 
 ## User experience
 ![User experience illustration](/artwork/repo/user-experience.webp)
