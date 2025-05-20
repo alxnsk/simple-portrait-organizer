@@ -137,6 +137,7 @@ class SimplePortraitOrganizer extends FormApplication {
     #processPastedImage(event){
         const pastedData = event?.clipboardData?.files[0];
         if ( undefined != pastedData && pastedData.type.substring(0,6) === "image/"){
+            event.preventDefault();
             if( game.user.isGM && game.settings.get("simple-portrait-organizer", "keepOriginalFilenamesForGM") ){
                 
                 /**If the user is a GM and he wishes to keep the original file names, there's a good chance that when image is pasted from 
