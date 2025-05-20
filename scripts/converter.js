@@ -147,7 +147,7 @@ class SimplePortraitOrganizer extends FormApplication {
                 window.removeEventListener("paste", this.pasteEventHandler);
 
                 new Dialog({
-                    title: "Select a filename",
+                    title: game.i18n.localize("simple-portrait-organizer.dialog.selectFilename"),
                     content: '<p/><div align="center"><input id="dialog_box" style="width:375px" autofocus value="' + pastedData.name.replace(/\.\w+$/, "") + '"></input></div>',
                     buttons: {
                         ok: {

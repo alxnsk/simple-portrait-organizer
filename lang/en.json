@@ -1,5 +1,6 @@
 {
     "simple-portrait-organizer" : {
+        
         "settings" : {
             "uploadDirectoryName" : "Upload directory",
             "uploadDirectoryHint" : "Choose the directory where converted WebP images will be saved.",
@@ -25,10 +26,15 @@
             "generateRandomFileNameName" : "Generate random name for each uploaded file",
             "generateRandomFileNameHint" : "Will cause a mess, but ensures the updated image appears immediately. Solves editing problem."
         },
+
         "form" : {
             "chooseFile" : "Choose, paste or drop an image:",
             "dropHere" : "Drop an image here, or paste one from the clipboard. (Ctrl + V)",
             "chooseFileLabel" : "Choose file"
+        },
+
+        "dialog" : {
+            "selectFilename" : "Confirm a filename"
         }
     }
 }
