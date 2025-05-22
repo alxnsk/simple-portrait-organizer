@@ -36,3 +36,4 @@ But as a GM:
 * You can choose a separate folder for your files.
 * You can keep the original names.
 * And if you choose to do so, a pop-up window will appear when you paste something from the clipboard, allowing you to edit a resulting name.
+* You can limit the maximum image resolution per side. The image will be downscaled proportionally.
