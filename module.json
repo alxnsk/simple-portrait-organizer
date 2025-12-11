@@ -2,7 +2,7 @@
     "id": "simple-portrait-organizer",
     "title": "Simple Portrait Organizer",
     "description": "This FoundryVTT module replaces the standard FilePicker window for non-GM users with a simple drag-and-drop interface, which converts any provided image to WebP format on the client side and saves it in a location specified by the GM.",
-    "version": "1.2.4",
+    "version": "1.2.5",
     "authors": [
         {
             "name": "alxnsk",
@@ -14,8 +14,8 @@
     "esmodules": [],
     "compatibility": {
         "minimum": 10,
-        "maximum": 13,
-        "verified": 12
+        "maximum": 14,
+        "verified": 13.351
     },
     "languages": [
         {

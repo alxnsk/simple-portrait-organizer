@@ -1,10 +1,18 @@
 <form id="simple-portrait-organizer-form">
-    <label>{{localize "simple-portrait-organizer.form.chooseFile"}}</label>
+    <label id="simple-portrait-organizer-status-label">{{localize "simple-portrait-organizer.form.chooseFile"}}</label>
     <div id="simple-portrait-organizer-drop-area">{{localize "simple-portrait-organizer.form.dropHere"}}</div>
-        <label for="simple-portrait-organizer-upload" id="simple-portrait-organizer-input-label">
+        <label for="simple-portrait-organizer-upload" class="simple-portrait-organizer-label-button" id="simple-portrait-organizer-input-label">
             <i class="fa-solid fa-upload"></i>
             {{localize "simple-portrait-organizer.form.chooseFileLabel"}}
         </label>
         <input id="simple-portrait-organizer-upload" type="file" accept="image/*" class="simple-portrait-organizer-hidden"></input>
-    <img id="simple-portrait-organizer-preview-canvas" src="" alt="Preview will appear here" class="simple-portrait-organizer-hidden" />
+        {{#if isGM}}
+            <label for="button-original-file-browser-window" class="simple-portrait-organizer-label-button" id="simple-portrait-organizer-open-fp-label">
+                <i class="fa-solid fa-box"></i>
+                {{localize "simple-portrait-organizer.form.defaultUploader"}}
+            </label>
+            <input id="button-original-file-browser-window" type="button" class="simple-portrait-organizer-hidden"></input>
+        {{/if}}
+        <img id="simple-portrait-organizer-preview-canvas" src="" alt="Preview will appear here" class="simple-portrait-organizer-hidden" />
+    <div id="simple-portrait-organizer-uploading-now" class="simple-portrait-organizer-hidden"><image src="modules/simple-portrait-organizer/artwork/module/uploading.webp"></i>
 </form>

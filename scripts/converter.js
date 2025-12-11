@@ -1,6 +1,13 @@
 Hooks.once('init', () => {
     const originalBrowse = FilePicker.prototype.browse;
     FilePicker.prototype.browse = async function () {
+        if(game.user.isGM){
+            SimplePortraitOrganizer.originalBrowseGlobal = originalBrowse;
+            SimplePortraitOrganizer.lastClickThis = this;
+            SimplePortraitOrganizer.lastClickArguments = arguments;
+        }
+        
+        console.log(...arguments);
         const forced = game.settings.get("simple-portrait-organizer", "enabledForGm") || false;
 
         const hijackModes = {
@@ -134,6 +141,16 @@ class SimplePortraitOrganizer extends FormApplication {
         });
     }
 
+    getData(options = {}) {
+        // super.getData returns the form's base data (object/entity if used)
+        const data = super.getData(options);
+
+        // Add GM check
+        data.isGM = game.user.isGM;
+
+        return data;
+    }
+
     #processPastedImage(event){
         const pastedData = event?.clipboardData?.files[0];
         if ( undefined != pastedData && pastedData.type.substring(0,6) === "image/"){
@@ -172,7 +189,11 @@ class SimplePortraitOrganizer extends FormApplication {
     #showPreview(){
         this.dropArea.classList.add("simple-portrait-organizer-hidden");
         this.inputUploadLabel.classList.add("simple-portrait-organizer-hidden");
+        if(null != this.openOriginalFP) 
+            this.openOriginalFP.classList.add("simple-portrait-organizer-hidden");
         this.previewCanvas.classList.remove("simple-portrait-organizer-hidden");
+        this.pumpingGobo.classList.remove("simple-portrait-organizer-hidden");
+        this.formStatusLabel.innerText = game.i18n.localize("simple-portrait-organizer.form.uploadingNow");
     }
     
     activateListeners(html) {
@@ -182,6 +203,19 @@ class SimplePortraitOrganizer extends FormApplication {
         this.inputUpload      = html.find("#simple-portrait-organizer-upload")[0];
         this.inputUploadLabel = html.find("#simple-portrait-organizer-input-label")[0];
         this.previewCanvas    = html.find("#simple-portrait-organizer-preview-canvas")[0];
+        this.formStatusLabel  = html.find("#simple-portrait-organizer-status-label")[0];
+        this.pumpingGobo      = html.find("#simple-portrait-organizer-uploading-now")[0];
+        this.labelOriginalFP  = html.find("#simple-portrait-organizer-open-fp-label")[0];
+
+        if( game.user.isGM ){
+            html.find("#button-original-file-browser-window")[0].addEventListener("click", function (){
+                this.close();
+                return SimplePortraitOrganizer.originalBrowseGlobal.call(
+                    SimplePortraitOrganizer.lastClickThis,
+                    ...SimplePortraitOrganizer.lastClickArguments
+                );
+            }.bind(this));
+        }
 
         if( true === game.settings.get("simple-portrait-organizer", "capturePasteEvents") ){
             window.addEventListener("paste", this.pasteEventHandler);
@@ -286,4 +320,5 @@ class SimplePortraitOrganizer extends FormApplication {
     static escapeFileName(dirtyString){
         return dirtyString.replace(/[^A-Za-z\d]/g, "x");
     }
+
 }

@@ -30,7 +30,7 @@
     display: none !important;
 }
 
-#simple-portrait-organizer-input-label {
+.simple-portrait-organizer-label-button {
     display: block;
     background: rgba(255, 255, 240, 0.8);
     padding: 3px;
@@ -41,9 +41,21 @@
     line-height: 28px;
     font-family: var(--font-primary);
     cursor: pointer;
-    margin: 0px 1px;
+    margin: auto;
 }
 
-#simple-portrait-organizer-input-label:hover {
+.simple-portrait-organizer-label-button:hover {
     box-shadow: inset 0px 0px 3px 1px rgba(170, 0, 0, 0.6);
+}
+
+#simple-portrait-organizer-uploading-now {
+    width: 50%;
+    position: absolute;
+    top: 25%;
+    right: 25%;
+    opacity: .8;
+}
+
+#simple-portrait-organizer-uploading-now img{
+    border:none;
 }

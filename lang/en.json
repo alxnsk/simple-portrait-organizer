@@ -29,8 +29,10 @@
 
         "form" : {
             "chooseFile" : "Choose, paste or drop an image:",
-            "dropHere" : "Drop an image here, or paste one (Ctrl + V)",
-            "chooseFileLabel" : "Choose file"
+            "uploadingNow": "Please wait untill uploading is done.",
+            "dropHere" : "Drop an image here, or paste one from the clipboard. (Ctrl + V)",
+            "chooseFileLabel" : "Choose file",
+            "defaultUploader" : "Open default FilePicker"
         },
 
         "dialog" : {
