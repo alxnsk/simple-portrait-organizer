@@ -15,7 +15,7 @@ Hooks.once('init', () => {
             "image"      : true
         };
 
-        if( (!forced && game.user.isGM) || true !== hijackModes[this.type] ){
+        if( (!forced && game.user.isGM) || true !== hijackModes[this.type] || undefined !== arguments[0]){
             return originalBrowse.call(this, ...arguments);
         }
 
@@ -30,7 +30,7 @@ Hooks.once('init', () => {
         // Trigger a callback and close
         if ( this.callback ) this.callback(path, this);
         return this.close();
-        
+
     }
     
     // Upload dir path
