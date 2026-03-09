@@ -9,9 +9,8 @@
             "url": "https://github.com/alxnsk"
         }
     ],
-    "scripts": ["scripts/converter.js"],
     "styles": ["styles/style.css"],
-    "esmodules": [],
+    "esmodules": ["module/converter.mjs"],
     "compatibility": {
         "minimum": 10,
         "maximum": 14,

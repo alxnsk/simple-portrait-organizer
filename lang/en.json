@@ -2,6 +2,9 @@
     "simple-portrait-organizer" : {
         
         "settings" : {
+            "storageSourceName" : "Storage source",
+            "storageSourceHint" : "Option for cloud provider file system support. If options like S3 or Forge are available, they will be shown here.",
+
             "uploadDirectoryName" : "Upload directory",
             "uploadDirectoryHint" : "Choose the directory where converted WebP images will be saved.",
 

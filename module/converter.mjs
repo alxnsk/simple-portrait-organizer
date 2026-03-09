@@ -1,13 +1,17 @@
+import * as INIT from "./init.mjs";
+
 Hooks.once('init', () => {
+    INIT.settings();
+
     const originalBrowse = FilePicker.prototype.browse;
+
     FilePicker.prototype.browse = async function () {
         if(game.user.isGM){
             SimplePortraitOrganizer.originalBrowseGlobal = originalBrowse;
             SimplePortraitOrganizer.lastClickThis = this;
             SimplePortraitOrganizer.lastClickArguments = arguments;
         }
-        
-        console.log(...arguments);
+
         const forced = game.settings.get("simple-portrait-organizer", "enabledForGm") || false;
 
         const hijackModes = {
@@ -33,85 +37,6 @@ Hooks.once('init', () => {
 
     }
     
-    // Upload dir path
-    game.settings.register("simple-portrait-organizer", "uploadDirectory", {
-        name: game.i18n.localize("simple-portrait-organizer.settings.uploadDirectoryName"),
-        hint: game.i18n.localize("simple-portrait-organizer.settings.uploadDirectoryHint"),
-        scope: "world",
-        config: true,
-        default: "",
-        type: String,
-        filePicker: "folder"
-    });
-
-    game.settings.register("simple-portrait-organizer", "capturePasteEvents", {
-        name: game.i18n.localize("simple-portrait-organizer.settings.capturePasteEventsName"),
-        hint: game.i18n.localize("simple-portrait-organizer.settings.capturePasteEventsHint"),
-        scope: "world",
-        config: true,
-        default: true,
-        requiresReload: true,
-        type: Boolean
-    });
-
-    // Max side size in pixels.
-    game.settings.register("simple-portrait-organizer", "maxSidePixelSize", {
-        name: game.i18n.localize("simple-portrait-organizer.settings.maxSidePixelSizeName"),
-        hint: game.i18n.localize("simple-portrait-organizer.settings.maxSidePixelSizeHint"),
-        scope: "world",
-        config: true,
-        default: 0,
-        type: Number
-    });
-    
-    // Compression rate percent
-    game.settings.register("simple-portrait-organizer", "qualityPercent", {
-        name: game.i18n.localize("simple-portrait-organizer.settings.qualityPercentName"),
-        hint: game.i18n.localize("simple-portrait-organizer.settings.qualityPercentHint"),
-        scope: "world",
-        config: true,
-        type: Number,
-        range: { min: 5, max: 95, step: 5 },
-        default: 80
-    });
-
-    game.settings.register("simple-portrait-organizer", "generateRandomFileName", {
-        name: game.i18n.localize("simple-portrait-organizer.settings.generateRandomFileNameName"),
-        hint: game.i18n.localize("simple-portrait-organizer.settings.generateRandomFileNameHint"),
-        scope: "world",
-        config: true,
-        default: false,
-        type: Boolean
-    });
-    
-    game.settings.register("simple-portrait-organizer", "enabledForGm", {
-        name: game.i18n.localize("simple-portrait-organizer.settings.enabledForGmName"),
-        hint: game.i18n.localize("simple-portrait-organizer.settings.enabledForGmHint"),
-        scope: "world",
-        config: true,
-        default: false,
-        type: Boolean
-    });
-
-    // Special upload dir for GM. If needed.
-    game.settings.register("simple-portrait-organizer", "uploadDirectoryGM", {
-        name: game.i18n.localize("simple-portrait-organizer.settings.uploadDirectoryGMName"),
-        hint: game.i18n.localize("simple-portrait-organizer.settings.uploadDirectoryGMHint"),
-        scope: "world",
-        config: true,
-        default: "",
-        type: String,
-        filePicker: "folder"
-    });
-
-    game.settings.register("simple-portrait-organizer", "keepOriginalFilenamesForGM", {
-        name: game.i18n.localize("simple-portrait-organizer.settings.keepOriginalFilenamesForGMName"),
-        hint: game.i18n.localize("simple-portrait-organizer.settings.keepOriginalFilenamesForGMHint"),
-        scope: "world",
-        config: true,
-        default: false,
-        type: Boolean
-    });
     
 });
 
@@ -246,7 +171,7 @@ class SimplePortraitOrganizer extends FormApplication {
     }
     
     async _convertAndUpload(file, customName = null) {
-        const img = new Image();
+        const img    = new Image();
         const reader = new FileReader();
         
         reader.onload = (e) => {
@@ -305,8 +230,15 @@ class SimplePortraitOrganizer extends FormApplication {
                     else
                         uploadPath = game.settings.get("simple-portrait-organizer", "uploadDirectory") || "";
                     
+                    const source = game.settings.get("simple-portrait-organizer", "storageSource") || "data";
+                    if("data" !== source && "" != uploadPath){
+                        //If source is not the local storage, we should recreate file structure,
+                        //  before the upload.
+                        await FilePicker.createDirectory(source, uploadPath);
+                    }
+
+                    const result = await FilePicker.upload(source, uploadPath, webpFile);
                     
-                    const result = await FilePicker.upload("data", uploadPath, webpFile);
                     if (this._resolver) this._resolver(result.path); // Resolve the promise with the file path
                     this.close();
                     
