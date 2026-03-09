@@ -9,6 +9,7 @@
             "url": "https://github.com/alxnsk"
         }
     ],
+    "scripts": [],
     "styles": ["styles/style.css"],
     "esmodules": ["module/converter.mjs"],
     "compatibility": {
