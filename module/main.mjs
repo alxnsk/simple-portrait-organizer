@@ -1,13 +1,12 @@
 import * as INIT from "./init.mjs";
-
 Hooks.once('init', () => {
     const FP = INIT.CompatibleFilePickerGet();
     INIT.settings();
-    const SimplePortraitOrganizer = INIT.CompatibleUIGet();
-    const app = new SimplePortraitOrganizer();
     const originalBrowse = FP.prototype.browse;
     
     FP.prototype.browse = async function () {
+        const SimplePortraitOrganizer = await INIT.CompatibleUIGet();
+        const app = new SimplePortraitOrganizer();
         if(game.user.isGM){
             app.originalBrowseGlobal = originalBrowse;
             app.lastClickThis        = this;
@@ -24,7 +23,7 @@ Hooks.once('init', () => {
         if( (!forced && game.user.isGM) || true !== hijackModes[this.type] || undefined !== arguments[0]){
             return originalBrowse.call(this, ...arguments);
         }
-        console.log(app);
+
         app.render(true);
         const path = await app.result;
         // Update the target field

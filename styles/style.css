@@ -72,8 +72,6 @@
   border: 1px solid;
   border-radius: 4px;
 
-  color: var(--color-text-primary);
-
   cursor: pointer;
   transition: box-shadow 150ms ease;
   margin: 3px;

@@ -1,6 +1,3 @@
-import appV1 from "./AppForms.mjs";
-import appV2 from "./AppFormsV2.mjs";
-
 export function settings(){
     //Some cloud providers are implemented their own file storage systems,
     //  and any hoster can use S3 storage.
@@ -105,14 +102,15 @@ export function settings(){
     });
 }
 
-export function CompatibleUIGet(UseV1 = false){
-    if( ( foundry?.applications?.api?.ApplicationV2 === undefined ) || UseV1 )
-        return appV1;
+export async function CompatibleUIGet(UseV1 = false){
+    if( ( foundry?.applications?.api?.ApplicationV2 === undefined ) || UseV1 ){
+        return (await import(`./AppForms.mjs`)).default;
+    }
     else
-        return appV2;
+        return (await import(`./AppFormsV2.mjs`)).default;
 }
 
 export function CompatibleFilePickerGet(){
-    return foundry.applications.apps.FilePicker.implementation ?? FilePicker;
+    return foundry?.applications?.apps?.FilePicker?.implementation ?? FilePicker;
 }
 
