@@ -14,7 +14,7 @@
     "esmodules": ["module/main.mjs"],
     "compatibility": {
         "minimum": 10,
-        "maximum": 16,
+        "maximum": 14,
         "verified": 14.365
     },
     "languages": [

@@ -5,7 +5,7 @@
 > User needs a permission to upload files.
 
 
-![Supported platforms](https://img.shields.io/badge/Supported_Foundry_Versions-10--13-%23556b2f)
+![Supported platforms](https://img.shields.io/badge/Supported_Foundry_Versions-10--14-%23556b2f)
 ![Version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fgithub.com%2Falxnsk%2Fsimple-portrait-organizer%2Freleases%2Flatest%2Fdownload%2Fmodule.json&query=%24.version&style=flat&label=Current%20version&color=%23556b2f)
 ![License](https://img.shields.io/github/license/alxnsk/simple-portrait-organizer)
 
