@@ -11,11 +11,11 @@
     ],
     "scripts": [],
     "styles": ["styles/style.css"],
-    "esmodules": ["module/converter.mjs"],
+    "esmodules": ["module/main.mjs"],
     "compatibility": {
         "minimum": 10,
-        "maximum": 14,
-        "verified": 13.351
+        "maximum": 16,
+        "verified": 14.365
     },
     "languages": [
         {

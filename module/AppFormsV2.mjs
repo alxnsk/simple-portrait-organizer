@@ -1,0 +1,225 @@
+import { CompatibleFilePickerGet } from "./init.mjs";
+const FP = CompatibleFilePickerGet();
+
+const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
+const InitOptions = {
+    id:       "simple-portrait-organizer",
+    title:    "Simple Portrait Organizer",
+    template: "modules/simple-portrait-organizer/templates/uiV2.html"
+};
+
+export default class SimplePortraitOrganizer extends HandlebarsApplicationMixin(ApplicationV2) {
+    constructor(...args) {
+        super(...args);
+        this._resolver = null;
+        this._promise = new Promise(resolve => this._resolver = resolve);
+        this.pasteEventHandler = this.#processPastedImage.bind(this);
+        
+        if( true === game.settings.get("simple-portrait-organizer", "capturePasteEvents") ){
+            Hooks.on('closeSimplePortraitOrganizer', function(){
+                window.removeEventListener("paste", this.pasteEventHandler);
+            }.bind(this));
+        }
+    }
+
+    static DEFAULT_OPTIONS = {
+        id: InitOptions.id,
+        tag: "form",
+        window: {
+            title: InitOptions.title
+        }
+    };
+    
+    static PARTS = {
+        main: {
+            template: InitOptions.template
+        }
+    };
+    
+    async _prepareContext () {
+        return {
+            isGM: game.user.isGM
+        };
+    };
+    
+    async _onRender (context, options) {
+        super._onRender(context, options);
+        
+        this.dropArea         = this.element.querySelector("#simple-portrait-organizer-drop-area");
+        this.inputUpload      = this.element.querySelector("#simple-portrait-organizer-upload");
+        this.inputUploadLabel = this.element.querySelector("#simple-portrait-organizer-input-label");
+        this.previewCanvas    = this.element.querySelector("#simple-portrait-organizer-preview-canvas");
+        this.formStatusLabel  = this.element.querySelector("#simple-portrait-organizer-status-label");
+        this.pumpingGobo      = this.element.querySelector("#simple-portrait-organizer-uploading-now");
+        this.labelOriginalFP  = this.element.querySelector("#simple-portrait-organizer-open-fp-label");
+        
+        if( game.user.isGM ){
+            this.element.querySelector("#button-original-file-browser-window").addEventListener("click", function (){
+                this.close();
+                return this.originalBrowseGlobal.call(
+                    this.lastClickThis,
+                    ...this.lastClickArguments
+                );
+            }.bind(this));
+        }
+        
+        if( true === game.settings.get("simple-portrait-organizer", "capturePasteEvents") ){
+            window.addEventListener("paste", this.pasteEventHandler);
+        };
+        
+        this.inputUpload.addEventListener("change", (e)=>{
+            if (e.target.files[0]){
+                this.#showPreview();
+                this._convertAndUpload(e.target.files[0]);
+            }
+        });
+        
+        this.dropArea.addEventListener("dragover", (e) => {
+            e.preventDefault();
+            this.dropArea.classList.add("hover");
+        });
+        
+        this.dropArea.addEventListener("dragleave", () => {
+            this.dropArea.classList.remove("hover");
+        });
+        
+        this.dropArea.addEventListener("drop", (e) => {
+            e.preventDefault();
+            this.#showPreview();
+            const file = e.dataTransfer.files[0];
+            if (file) this._convertAndUpload(file);
+        });
+    }
+    
+    get result() {
+        return this._promise;
+    }
+    
+    #processPastedImage(event){
+        const pastedData = event?.clipboardData?.files[0];
+        if ( undefined != pastedData && pastedData.type.substring(0,6) === "image/"){
+            event.preventDefault();
+            if( game.user.isGM && game.settings.get("simple-portrait-organizer", "keepOriginalFilenamesForGM") ){
+                
+                /**If the user is a GM and he wishes to keep the original file names, there's a good chance that when image is pasted from 
+                * the clipboard, especially if it was copied from a browser, it will have a generic name like "image".
+                * This can cause undesired behavior, so we will give the user a chance to review the file name and change it if needed. 
+                * If original names not required, we just replace "image" with random name.*/
+                
+                window.removeEventListener("paste", this.pasteEventHandler);
+                
+                new Dialog({
+                    title: game.i18n.localize("simple-portrait-organizer.dialog.selectFilename"),
+                    content: '<p/><div align="center"><input id="dialog_box" style="width:375px" autofocus value="' + pastedData.name.replace(/\.\w+$/, "") + '"></input></div>',
+                    buttons: {
+                        ok: {
+                            label: "OK",
+                            callback: function(){
+                                this.#showPreview();
+                                this._convertAndUpload(pastedData, document.getElementById("dialog_box").value + ".webp");
+                            }.bind(this)
+                        }
+                    },
+                    close: function(){this.close()}.bind(this),
+                    default:"ok"
+                }).render(true);
+            }else{
+                this.#showPreview();
+                this._convertAndUpload(pastedData);
+            }            
+        }
+    }
+    
+    #showPreview(){
+        this.dropArea.classList.add("simple-portrait-organizer-hidden");
+        this.inputUploadLabel.classList.add("simple-portrait-organizer-hidden");
+        if(null != this.openOriginalFP) 
+            this.openOriginalFP.classList.add("simple-portrait-organizer-hidden");
+        this.previewCanvas.classList.remove("simple-portrait-organizer-hidden");
+        this.pumpingGobo.classList.remove("simple-portrait-organizer-hidden");
+        this.formStatusLabel.innerText = game.i18n.localize("simple-portrait-organizer.form.uploadingNow");
+    }
+    
+    async _convertAndUpload(file, customName = null) {
+        const img    = new Image();
+        const reader = new FileReader();
+        
+        reader.onload = (e) => {
+            img.src = e.target.result;
+            this.element.querySelector("#simple-portrait-organizer-preview-canvas").src = img.src;
+            img.onload = async () => {
+                const settingSizeLimit = game.settings.get("simple-portrait-organizer", "maxSidePixelSize") || 0;
+                const settingCompression = game.settings.get("simple-portrait-organizer", "qualityPercent") || 80;
+                
+                let targetQuality = settingCompression / 100;
+                if(settingCompression < 10 || settingCompression > 100){
+                    targetQuality = 0.8;
+                }
+                
+                let targetWidth  = img.width;
+                let targetHeight = img.height;
+                
+                if( null != settingSizeLimit && settingSizeLimit > 0){
+                    let scale = 1;
+                    if(img.width > settingSizeLimit){
+                        scale = settingSizeLimit / img.width;  
+                    }else if(img.height > settingSizeLimit){
+                        scale = settingSizeLimit / img.height;
+                    }
+                    
+                    targetWidth  = Math.min( Math.trunc( targetWidth * scale ),  settingSizeLimit) ;
+                    targetHeight = Math.min( Math.trunc( targetHeight * scale ), settingSizeLimit);
+                }
+                
+                const canvas  = document.createElement("canvas");
+                canvas.width  = targetWidth;
+                canvas.height = targetHeight;
+                canvas.getContext("2d").drawImage(img, 0, 0, img.width, img.height, 0,0, targetWidth, targetHeight);
+                
+                canvas.toBlob(async (blob) => {
+                    const safeUserName = SimplePortraitOrganizer.escapeFileName(game.user.name);
+                    
+                    //Name is random or not? 
+                    let newFileName = "";
+                    if( game.user.isGM && game.settings.get("simple-portrait-organizer", "keepOriginalFilenamesForGM") ){
+                        //GM may want to keep original filenames.
+                        newFileName = customName ?? file.name.replace(/\.\w+$/, ".webp");
+                    }else if( (true === game.settings.get("simple-portrait-organizer", "generateRandomFileName")) || /^image\.[a-zA-Z\d]{3,4}$/.test(file.name) ){
+                        //It's random if GM desided it to be so, or image is pasted with generic name, like image.png, image.webp ... etc.
+                        newFileName = safeUserName + "-" + foundry.utils.randomID(18) + ".webp";
+                    }else{
+                        //In other cases we just take original filename.
+                        newFileName = safeUserName + "-" + ( customName ?? file.name.replace(/\.\w+$/, ".webp") );
+                    }
+                    
+                    const webpFile = new File([blob], newFileName, { type: "image/webp" });
+                    let uploadPath = "";
+                    
+                    if( game.user.isGM && "" !== game.settings.get("simple-portrait-organizer", "uploadDirectoryGM") )
+                        uploadPath = game.settings.get("simple-portrait-organizer", "uploadDirectoryGM");
+                    else
+                        uploadPath = game.settings.get("simple-portrait-organizer", "uploadDirectory") || "";
+                    
+                    const source = game.settings.get("simple-portrait-organizer", "storageSource") || "data";
+                    if("data" !== source && "" != uploadPath){
+                        //If source is not the local storage, we should recreate file structure,
+                        //  before the upload.
+                        await FP.createDirectory(source, uploadPath);
+                    }
+                    
+                    const result = await FP.upload(source, uploadPath, webpFile);
+                    
+                    if (this._resolver) this._resolver(result.path); // Resolve the promise with the file path
+                    this.close();
+                    
+                }, "image/webp", targetQuality);
+            };
+        };
+        
+        reader.readAsDataURL(file);
+    }
+    
+    static escapeFileName(dirtyString){
+        return dirtyString.replace(/[^A-Za-z\d]/g, "x");
+    }
+}

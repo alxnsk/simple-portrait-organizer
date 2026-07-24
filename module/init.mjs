@@ -1,15 +1,18 @@
+import appV1 from "./AppForms.mjs";
+import appV2 from "./AppFormsV2.mjs";
+
 export function settings(){
     //Some cloud providers are implemented their own file storage systems,
     //  and any hoster can use S3 storage.
-
-    const picker = new FilePicker();
+    const tmpPicker = CompatibleFilePickerGet();
+    const picker = new tmpPicker();
     const sourceList = {};
     for(const option in picker.sources){
         //Public will be always excluded from sources. The user's files, should not be there.
         if("public" !== option)
             sourceList[option] = option;
     }
-
+    
     game.settings.register("simple-portrait-organizer", "storageSource", {
         name: game.i18n.localize("simple-portrait-organizer.settings.storageSourceName"),
         hint: game.i18n.localize("simple-portrait-organizer.settings.storageSourceHint"),
@@ -101,3 +104,15 @@ export function settings(){
         type: Boolean
     });
 }
+
+export function CompatibleUIGet(UseV1 = false){
+    if( ( foundry?.applications?.api?.ApplicationV2 === undefined ) || UseV1 )
+        return appV1;
+    else
+        return appV2;
+}
+
+export function CompatibleFilePickerGet(){
+    return foundry.applications.apps.FilePicker.implementation ?? FilePicker;
+}
+

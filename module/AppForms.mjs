@@ -1,46 +1,7 @@
-import * as INIT from "./init.mjs";
+import { CompatibleFilePickerGet } from "./init.mjs";
+const FP = CompatibleFilePickerGet();
 
-Hooks.once('init', () => {
-    INIT.settings();
-
-    const originalBrowse = FilePicker.prototype.browse;
-
-    FilePicker.prototype.browse = async function () {
-        if(game.user.isGM){
-            SimplePortraitOrganizer.originalBrowseGlobal = originalBrowse;
-            SimplePortraitOrganizer.lastClickThis = this;
-            SimplePortraitOrganizer.lastClickArguments = arguments;
-        }
-
-        const forced = game.settings.get("simple-portrait-organizer", "enabledForGm") || false;
-
-        const hijackModes = {
-            "imagevideo" : true,
-            "image"      : true
-        };
-
-        if( (!forced && game.user.isGM) || true !== hijackModes[this.type] || undefined !== arguments[0]){
-            return originalBrowse.call(this, ...arguments);
-        }
-
-        const app = new SimplePortraitOrganizer();
-        app.render(true);
-        const path = await app.result;
-        // Update the target field
-        if ( this.field ) {
-            this.field.value = path;
-            this.field.dispatchEvent(new Event("change", {bubbles: true, cancelable: true}));
-        }
-        // Trigger a callback and close
-        if ( this.callback ) this.callback(path, this);
-        return this.close();
-
-    }
-    
-    
-});
-
-class SimplePortraitOrganizer extends FormApplication {
+export default class SimplePortraitOrganizer extends FormApplication {
     constructor(...args) {
         super(...args);
         this._resolver = null;
@@ -135,9 +96,9 @@ class SimplePortraitOrganizer extends FormApplication {
         if( game.user.isGM ){
             html.find("#button-original-file-browser-window")[0].addEventListener("click", function (){
                 this.close();
-                return SimplePortraitOrganizer.originalBrowseGlobal.call(
-                    SimplePortraitOrganizer.lastClickThis,
-                    ...SimplePortraitOrganizer.lastClickArguments
+                return this.originalBrowseGlobal.call(
+                    this.lastClickThis,
+                    ...this.lastClickArguments
                 );
             }.bind(this));
         }
@@ -234,10 +195,10 @@ class SimplePortraitOrganizer extends FormApplication {
                     if("data" !== source && "" != uploadPath){
                         //If source is not the local storage, we should recreate file structure,
                         //  before the upload.
-                        await FilePicker.createDirectory(source, uploadPath);
+                        await FP.createDirectory(source, uploadPath);
                     }
 
-                    const result = await FilePicker.upload(source, uploadPath, webpFile);
+                    const result = await FP.upload(source, uploadPath, webpFile);
                     
                     if (this._resolver) this._resolver(result.path); // Resolve the promise with the file path
                     this.close();
