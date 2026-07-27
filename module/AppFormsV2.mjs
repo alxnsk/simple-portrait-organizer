@@ -21,7 +21,7 @@ export default class SimplePortraitOrganizer extends HandlebarsApplicationMixin(
             }.bind(this));
         }
     }
-
+    
     static DEFAULT_OPTIONS = {
         id: InitOptions.id,
         tag: "form",
@@ -85,6 +85,18 @@ export default class SimplePortraitOrganizer extends HandlebarsApplicationMixin(
         
         this.dropArea.addEventListener("drop", (e) => {
             e.preventDefault();
+            if(e.dataTransfer.files.length === 0){
+                ui.notifications.error(game.i18n.localize("simple-portrait-organizer.errors.fileIsZeroSize"))
+                this.dropArea.classList.remove("hover");
+                return false;
+            }
+
+            if(e.dataTransfer.files[0].type.indexOf("image") !== 0){
+                ui.notifications.error(game.i18n.localize("simple-portrait-organizer.errors.fileIsNotImage"))
+                this.dropArea.classList.remove("hover");
+                return false;
+            }
+
             this.#showPreview();
             const file = e.dataTransfer.files[0];
             if (file) this._convertAndUpload(file);
@@ -133,21 +145,24 @@ export default class SimplePortraitOrganizer extends HandlebarsApplicationMixin(
     #showPreview(){
         this.dropArea.classList.add("simple-portrait-organizer-hidden");
         this.inputUploadLabel.classList.add("simple-portrait-organizer-hidden");
-        if(null != this.openOriginalFP) 
-            this.openOriginalFP.classList.add("simple-portrait-organizer-hidden");
+        if(null != this.labelOriginalFP) 
+            this.labelOriginalFP.classList.add("simple-portrait-organizer-hidden");
         this.previewCanvas.classList.remove("simple-portrait-organizer-hidden");
         this.pumpingGobo.classList.remove("simple-portrait-organizer-hidden");
         this.formStatusLabel.innerText = game.i18n.localize("simple-portrait-organizer.form.uploadingNow");
     }
     
     async _convertAndUpload(file, customName = null) {
-        const img    = new Image();
-        const reader = new FileReader();
+        if( 0 === file.size ){
+            ui.notifications.error(game.i18n.localize("simple-portrait-organizer.errors.fileIsZeroSize"))
+            this.close();
+        }
         
-        reader.onload = (e) => {
-            img.src = e.target.result;
-            this.element.querySelector("#simple-portrait-organizer-preview-canvas").src = img.src;
-            img.onload = async () => {
+        const img = new Image();
+        const url = URL.createObjectURL(file);
+
+        img.onload = async () => {
+            try {
                 const settingSizeLimit = game.settings.get("simple-portrait-organizer", "maxSidePixelSize") || 0;
                 const settingCompression = game.settings.get("simple-portrait-organizer", "qualityPercent") || 80;
                 
@@ -213,10 +228,13 @@ export default class SimplePortraitOrganizer extends HandlebarsApplicationMixin(
                     this.close();
                     
                 }, "image/webp", targetQuality);
-            };
+            } finally {
+                URL.revokeObjectURL(url);
+            }
         };
         
-        reader.readAsDataURL(file);
+        img.src = url;
+        this.element.querySelector("#simple-portrait-organizer-preview-canvas").src = img.src;
     }
     
     static escapeFileName(dirtyString){

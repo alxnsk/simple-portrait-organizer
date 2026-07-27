@@ -75,8 +75,8 @@ export default class SimplePortraitOrganizer extends FormApplication {
     #showPreview(){
         this.dropArea.classList.add("simple-portrait-organizer-hidden");
         this.inputUploadLabel.classList.add("simple-portrait-organizer-hidden");
-        if(null != this.openOriginalFP) 
-            this.openOriginalFP.classList.add("simple-portrait-organizer-hidden");
+        if(null != this.labelOriginalFP) 
+            this.labelOriginalFP.classList.add("simple-portrait-organizer-hidden");
         this.previewCanvas.classList.remove("simple-portrait-organizer-hidden");
         this.pumpingGobo.classList.remove("simple-portrait-organizer-hidden");
         this.formStatusLabel.innerText = game.i18n.localize("simple-portrait-organizer.form.uploadingNow");
@@ -125,6 +125,19 @@ export default class SimplePortraitOrganizer extends FormApplication {
         
         this.dropArea.addEventListener("drop", (e) => {
             e.preventDefault();
+            
+            if(e.dataTransfer.files.length === 0){
+                ui.notifications.error(game.i18n.localize("simple-portrait-organizer.errors.fileIsZeroSize"))
+                this.dropArea.classList.remove("hover");
+                return false;
+            }
+
+            if(e.dataTransfer.files[0].type.indexOf("image") !== 0){
+                ui.notifications.error(game.i18n.localize("simple-portrait-organizer.errors.fileIsNotImage"))
+                this.dropArea.classList.remove("hover");
+                return false;
+            }
+
             this.#showPreview();
             const file = e.dataTransfer.files[0];
             if (file) this._convertAndUpload(file);
@@ -132,6 +145,10 @@ export default class SimplePortraitOrganizer extends FormApplication {
     }
     
     async _convertAndUpload(file, customName = null) {
+        if( 0 === file.size ){
+            ui.notifications.error(game.i18n.localize("simple-portrait-organizer.errors.fileIsZeroSize"))
+            this.close();
+        }
         const img    = new Image();
         const reader = new FileReader();
         

@@ -40,6 +40,11 @@
 
         "dialog" : {
             "selectFilename" : "Confirm a filename"
+        },
+        
+        "errors" : {
+            "fileIsZeroSize" : "Cannot load file, try another method!",
+            "fileIsNotImage" : "Only image files are supported!"
         }
     }
 }
