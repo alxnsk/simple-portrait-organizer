@@ -43,7 +43,7 @@
         },
         
         "errors" : {
-            "fileIsZeroSize" : "Cannot load file, try another method!",
+            "fileIsZeroSize" : "Cannot load a file, try a different method!",
             "fileIsNotImage" : "Only image files are supported!"
         }
     }
