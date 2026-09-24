@@ -5,14 +5,6 @@ Hooks.once('init', () => {
     const originalBrowse = FP.prototype.browse;
     
     FP.prototype.browse = async function () {
-        const SimplePortraitOrganizer = await INIT.CompatibleUIGet();
-        const app = new SimplePortraitOrganizer();
-        if(game.user.isGM){
-            app.originalBrowseGlobal = originalBrowse;
-            app.lastClickThis        = this;
-            app.lastClickArguments   = arguments;
-        }
-        
         const forced = game.settings.get("simple-portrait-organizer", "enabledForGm") || false;
         
         const hijackModes = {
@@ -24,6 +16,14 @@ Hooks.once('init', () => {
             return originalBrowse.call(this, ...arguments);
         }
 
+        const SimplePortraitOrganizer = await INIT.CompatibleUIGet();
+        const app = new SimplePortraitOrganizer();
+        if(game.user.isGM){
+            app.originalBrowseGlobal = originalBrowse;
+            app.lastClickThis        = this;
+            app.lastClickArguments   = arguments;
+        }
+        
         app.render(true);
         const path = await app.result;
         // Update the target field

@@ -14,13 +14,9 @@ export default class SimplePortraitOrganizer extends HandlebarsApplicationMixin(
         this._resolver = null;
         this._promise = new Promise(resolve => this._resolver = resolve);
         this.pasteEventHandler = this.#processPastedImage.bind(this);
-        
-        if( true === game.settings.get("simple-portrait-organizer", "capturePasteEvents") ){
-            Hooks.on('closeSimplePortraitOrganizer', function(){
-                window.removeEventListener("paste", this.pasteEventHandler);
-            }.bind(this));
-        }
     }
+    
+    static eventAttached = false;
     
     static DEFAULT_OPTIONS = {
         id: InitOptions.id,
@@ -41,6 +37,16 @@ export default class SimplePortraitOrganizer extends HandlebarsApplicationMixin(
             isGM: game.user.isGM
         };
     };
+
+    _onFirstRender(){
+        if( true === game.settings.get("simple-portrait-organizer", "capturePasteEvents") )
+            this.#attachPasteListener();
+    }
+    
+    _onClose(){
+        if( true === game.settings.get("simple-portrait-organizer", "capturePasteEvents") )
+            this.#detachPasteListener();
+    }
     
     async _onRender (context, options) {
         super._onRender(context, options);
@@ -62,10 +68,6 @@ export default class SimplePortraitOrganizer extends HandlebarsApplicationMixin(
                 );
             }.bind(this));
         }
-        
-        if( true === game.settings.get("simple-portrait-organizer", "capturePasteEvents") ){
-            window.addEventListener("paste", this.pasteEventHandler);
-        };
         
         this.inputUpload.addEventListener("change", (e)=>{
             if (e.target.files[0]){
@@ -118,8 +120,8 @@ export default class SimplePortraitOrganizer extends HandlebarsApplicationMixin(
                 * This can cause undesired behavior, so we will give the user a chance to review the file name and change it if needed. 
                 * If original names not required, we just replace "image" with random name.*/
                 
-                window.removeEventListener("paste", this.pasteEventHandler);
-                
+                this.#detachPasteListener();
+
                 new Dialog({
                     title: game.i18n.localize("simple-portrait-organizer.dialog.selectFilename"),
                     content: '<p/><div align="center"><input id="dialog_box" style="width:375px" autofocus value="' + pastedData.name.replace(/\.\w+$/, "") + '"></input></div>',
@@ -239,5 +241,20 @@ export default class SimplePortraitOrganizer extends HandlebarsApplicationMixin(
     
     static escapeFileName(dirtyString){
         return dirtyString.replace(/[^A-Za-z\d]/g, "x");
+    }
+
+    #attachPasteListener() {
+        if (false !== SimplePortraitOrganizer.eventAttached)
+            this.#detachPasteListener(SimplePortraitOrganizer.eventAttached);
+
+        window.addEventListener("paste", this.pasteEventHandler);
+        SimplePortraitOrganizer.eventAttached = this.pasteEventHandler;
+    }
+
+    #detachPasteListener(oldHandler = null) {
+        if (false === SimplePortraitOrganizer.eventAttached) return;
+
+        window.removeEventListener("paste", oldHandler ?? this.pasteEventHandler);
+        SimplePortraitOrganizer.eventAttached = false;
     }
 }

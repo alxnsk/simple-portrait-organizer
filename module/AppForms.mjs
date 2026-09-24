@@ -9,11 +9,13 @@ export default class SimplePortraitOrganizer extends FormApplication {
         this.pasteEventHandler = this.#processPastedImage.bind(this);
         
         if( true === game.settings.get("simple-portrait-organizer", "capturePasteEvents") ){
-            Hooks.on('closeSimplePortraitOrganizer', function(){
-                window.removeEventListener("paste", this.pasteEventHandler);
-            }.bind(this));
+            Hooks.on('closeSimplePortraitOrganizer', function(detachPasteListener){
+                detachPasteListener();
+            }.bind(this, this.#detachPasteListener));
         }
     }
+
+    static eventAttached = false;
     
     get result() {
         return this._promise;
@@ -48,8 +50,8 @@ export default class SimplePortraitOrganizer extends FormApplication {
                  * This can cause undesired behavior, so we will give the user a chance to review the file name and change it if needed. 
                  * If original names not required, we just replace "image" with random name.*/
 
-                window.removeEventListener("paste", this.pasteEventHandler);
-
+                this.#detachPasteListener();
+                
                 new Dialog({
                     title: game.i18n.localize("simple-portrait-organizer.dialog.selectFilename"),
                     content: '<p/><div align="center"><input id="dialog_box" style="width:375px" autofocus value="' + pastedData.name.replace(/\.\w+$/, "") + '"></input></div>',
@@ -104,7 +106,7 @@ export default class SimplePortraitOrganizer extends FormApplication {
         }
 
         if( true === game.settings.get("simple-portrait-organizer", "capturePasteEvents") ){
-            window.addEventListener("paste", this.pasteEventHandler);
+            this.#attachPasteListener();
         };
 
         this.inputUpload.addEventListener("change", (e)=>{
@@ -229,6 +231,21 @@ export default class SimplePortraitOrganizer extends FormApplication {
 
     static escapeFileName(dirtyString){
         return dirtyString.replace(/[^A-Za-z\d]/g, "x");
+    }
+
+    #attachPasteListener() {
+        if (false !== SimplePortraitOrganizer.eventAttached)
+            this.#detachPasteListener(SimplePortraitOrganizer.eventAttached);
+
+        window.addEventListener("paste", this.pasteEventHandler);
+        SimplePortraitOrganizer.eventAttached = this.pasteEventHandler;
+    }
+
+    #detachPasteListener(oldHandler = null) {
+        if (false === SimplePortraitOrganizer.eventAttached) return;
+
+        window.removeEventListener("paste", oldHandler ?? this.pasteEventHandler);
+        SimplePortraitOrganizer.eventAttached = false;
     }
 
 }
