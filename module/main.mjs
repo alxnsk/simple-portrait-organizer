@@ -12,6 +12,10 @@ Hooks.once('init', () => {
             "image"      : true
         };
         
+        if(foundry.utils.isNewerVersion(game.version, "14") && true === game.settings.get("simple-portrait-organizer", "workOnTiles")){
+            hijackModes.texture = true;
+        }
+
         if( (!forced && game.user.isGM) || true !== hijackModes[this.type] || undefined !== arguments[0]){
             return originalBrowse.call(this, ...arguments);
         }

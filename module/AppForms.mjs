@@ -99,8 +99,7 @@ export default class SimplePortraitOrganizer extends FormApplication {
             html.find("#button-original-file-browser-window")[0].addEventListener("click", function (){
                 this.close();
                 return this.originalBrowseGlobal.call(
-                    this.lastClickThis,
-                    ...this.lastClickArguments
+                    this.lastClickThis
                 );
             }.bind(this));
         }

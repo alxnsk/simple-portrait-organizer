@@ -63,8 +63,7 @@ export default class SimplePortraitOrganizer extends HandlebarsApplicationMixin(
             this.element.querySelector("#button-original-file-browser-window").addEventListener("click", function (){
                 this.close();
                 return this.originalBrowseGlobal.call(
-                    this.lastClickThis,
-                    ...this.lastClickArguments
+                    this.lastClickThis
                 );
             }.bind(this));
         }

@@ -100,6 +100,17 @@ export function settings(){
         default: false,
         type: Boolean
     });
+
+    if(foundry.utils.isNewerVersion(game.version, "14")){
+        game.settings.register("simple-portrait-organizer", "workOnTiles", {
+            name: game.i18n.localize("simple-portrait-organizer.settings.workOnTilesName"),
+            hint: game.i18n.localize("simple-portrait-organizer.settings.workOnTilesHint"),
+            scope: "world",
+            config: true,
+            default: false,
+            type: Boolean
+        });
+    }
 }
 
 export async function CompatibleUIGet(UseV1 = false){
